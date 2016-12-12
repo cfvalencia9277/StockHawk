@@ -20,6 +20,7 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.sam_chordas.android.stockhawk.R;
@@ -87,12 +88,10 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
               @Override public void onItemClick(View v, int position) {
                 //TODO:
                 // do something on item click
-                /*
                 Intent intent = new Intent(MyStocksActivity.this, DetailActivity.class);
                 mCursor.moveToPosition(position);
                 intent.putExtra("symbol", mCursor.getString(1));
                 startActivity(intent);
-                 */
               }
             }));
     recyclerView.setAdapter(mCursorAdapter);
@@ -228,6 +227,29 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
   @Override
   public void onLoaderReset(Loader<Cursor> loader){
     mCursorAdapter.swapCursor(null);
+  }
+
+  private void updateEmptyView() {
+    if ( mCursorAdapter.getItemCount() == 0 ) {
+      TextView tv = (TextView) findViewById(R.id.network_message_view);
+      if ( null != tv ) {
+        // if cursor is empty, why? do we have an invalid location
+        int message = R.string.stock_info_not_available;
+        if (!Utils.hasNetworkConnection(this) ) {
+          message = R.string.network_not_available;
+        }
+        tv.setText(message);
+        tv.setVisibility(View.VISIBLE);
+        View recyclerView = findViewById(R.id.recycler_view);
+        recyclerView.setVisibility(View.GONE);
+      }
+    }
+    else{
+      TextView networkMessage = (TextView)findViewById(R.id.network_message_view);
+      networkMessage.setVisibility(View.GONE);
+      View recyclerView = findViewById(R.id.recycler_view);
+      recyclerView.setVisibility(View.VISIBLE);
+    }
   }
 
 }

@@ -1,6 +1,9 @@
 package com.sam_chordas.android.stockhawk.rest;
 
 import android.content.ContentProviderOperation;
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -8,7 +11,12 @@ import com.sam_chordas.android.stockhawk.data.QuoteColumns;
 import com.sam_chordas.android.stockhawk.data.QuoteProvider;
 import com.sam_chordas.android.stockhawk.ui.MyStocksActivity;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,6 +27,7 @@ import org.json.JSONObject;
 public class Utils {
 
   private static String LOG_TAG = Utils.class.getSimpleName();
+  public static final String DATE_FORMAT = "yyyy-MM-dd";
 
   public static boolean showPercent = true;
 
@@ -108,5 +117,48 @@ public class Utils {
       e.printStackTrace();
     }
     return builder.build();
+  }
+  public static boolean hasNetworkConnection(Context context) {
+    boolean hasConnectedWifi = false;
+    boolean hasConnectedMobile = false;
+
+    ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+    NetworkInfo[] netInfo = cm.getAllNetworkInfo();
+    for (NetworkInfo ni : netInfo) {
+      if (ni.getTypeName().equalsIgnoreCase("WIFI"))
+        if (ni.isConnected())
+          hasConnectedWifi = true;
+      if (ni.getTypeName().equalsIgnoreCase("MOBILE"))
+        if (ni.isConnected())
+          hasConnectedMobile = true;
+    }
+    return hasConnectedWifi || hasConnectedMobile;
+  }
+
+  public static String getFormattedDate(long dateInMillis) {
+    Locale localeUS = new Locale("en", "US");
+    SimpleDateFormat queryDayFormat = new SimpleDateFormat(Utils.DATE_FORMAT, localeUS);
+    return queryDayFormat.format(dateInMillis);
+  }
+  public static String getDateBackTo(Date date, int position){
+
+    Calendar calendar = Calendar.getInstance();
+    calendar.setTime(date);
+
+    switch (position){
+
+      case 0:
+        calendar.add(Calendar.YEAR, -1);
+        break;
+      case 1:
+        calendar.add(Calendar.MONTH, -1);
+        break;
+      case 2:
+        calendar.add(Calendar.DATE, -7);
+        break;
+
+    }
+
+    return getFormattedDate(calendar.getTimeInMillis());
   }
 }
